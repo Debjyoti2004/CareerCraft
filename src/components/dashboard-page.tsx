@@ -1,0 +1,172 @@
+'use client';
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Session } from 'next-auth';
+import UserDropdown from '@/components/user-dropdown';
+import PersonalInfo from './prsnl-info';
+import SkillsForm from './skills-form';
+import ExperienceForm from './exp-form';
+import EducationForm from './education-form';
+import TargetForm from './target-form';
+import ProgressIndicator from './progress-indicator';
+import { useFormContext } from '@/context/formcontext';
+import { useRouter } from 'next/navigation';
+import { toast, ToastContainer } from 'react-toastify';
+
+
+export default function DashboardPage({ session }: { session: Session }) {
+  const [step, setStep] = useState(1);
+  const [ToLocalStorage, setToLocalStorage] = useState(false);
+  const router = useRouter();
+  const { formData, updateFormData } = useFormContext();
+
+  const handleNext = () => {
+    if (step < 5) {
+      setStep(step + 1);
+    } else {
+      handleSubmit();
+    }
+  };
+
+  // Save formData to localStorage when shouldSave is true
+  useEffect(() => {
+    if (ToLocalStorage) {
+      localStorage.setItem('formData', JSON.stringify(formData));
+      setToLocalStorage(false); // Reset after saving
+    }
+  }, [ToLocalStorage, formData]);
+
+  const handleSubmit = () => {
+    console.log(formData);
+    if (
+      formData.name &&
+      formData.age &&
+      formData.skills.length > 0 &&
+      formData.experience.length > 0 &&
+      formData.education.degree &&
+      formData.education.institution &&
+      formData.education.year &&
+      formData.targetRole &&
+      formData.targetCompany &&
+      formData.recipientName
+    ) {
+      console.log('Form submitted:', formData);
+      setToLocalStorage(true);
+      router.push('/result');
+    } else {
+      toast.error('Please fill all the fields');
+    }
+  };
+
+  const handleBack = () => {
+    if (step > 1) setStep(step - 1);
+  };
+
+  // const fetchCoverLetter = async () => {
+  //   try {
+  //     const response = await fetch('/api/letter-gen', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(formData),
+  //     });
+
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       setCoverLetter(data.coverLetter);
+  //     } else {
+  //       console.error('Failed to fetch cover letter');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching cover letter:', error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchCoverLetter();
+  // }, [handleSubmit]);
+
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return (
+          <PersonalInfo
+            name={formData.name}
+            age={formData.age}
+            updateAge={(age) => updateFormData('age', age)}
+            updateName={(name) => updateFormData('name', name)}
+          />
+        );
+      case 2:
+        return (
+          <SkillsForm
+            skills={formData.skills}
+            updateSkills={(skills) => updateFormData('skills', skills)}
+          />
+        );
+      case 3:
+        return (
+          <ExperienceForm
+            experience={formData.experience}
+            updateExperience={(exp) => updateFormData('experience', exp)}
+          />
+        );
+      case 4:
+        return (
+          <EducationForm
+            education={formData.education}
+            updateEducation={(edu) => updateFormData('education', edu)}
+          />
+        );
+      case 5:
+        return (
+          <TargetForm
+            targetRole={formData.targetRole}
+            targetCompany={formData.targetCompany}
+            recipientName={formData.recipientName}
+            updateTarget={(recipientName, role, company) => {
+              updateFormData('recipientName', recipientName);
+              updateFormData('targetRole', role);
+              updateFormData('targetCompany', company);
+            }}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="flex flex-col bg-white">
+      <div className="min-h-screen flex flex-col justify-center bg-white">
+        <main className="container mx-auto max-w-3xl px-4 py-8">
+          <div className="space-y-8">
+            {renderStep()}
+
+            <div className="flex justify-center gap-4">
+              {step > 1 && (
+                <Button
+                  variant="outline"
+                  onClick={handleBack}
+                  className="bg-blue-600 hover:bg-blue-700 text-white hover:text-white"
+                >
+                  Back
+                </Button>
+              )}
+              <Button
+                onClick={handleNext}
+                className="bg-blue-600 text-white hover:bg-blue-700"
+              >
+                {step === 5 ? 'Submit' : 'Next'}
+              </Button>
+            </div>
+
+            <ProgressIndicator currentStep={step} />
+          </div>
+        </main>
+      </div> 
+      <ToastContainer position="bottom-right" autoClose={5000} />
+    </div>
+  );
+}
