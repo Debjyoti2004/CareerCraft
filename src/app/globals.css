@@ -214,6 +214,14 @@
   animation-delay: 1s;
 }
 
+.animation-delay-3000 {
+  animation-delay: 3s;
+}
+
+.animation-delay-5000 {
+  animation-delay: 5s;
+}
+
 /* Gradient text animation */
 @keyframes gradient {
   0%, 100% {
@@ -244,6 +252,33 @@
   animation: float 3s ease-in-out infinite;
 }
 
+/* Pulse animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 .no-scroll {
   overflow: hidden;
+}
+
+/* Ensure all custom classes are preserved */
+.animate-blob,
+.animation-delay-2000,
+.animation-delay-4000,
+.animation-delay-1000,
+.animation-delay-3000,
+.animation-delay-5000,
+.animate-gradient,
+.animate-float,
+.animate-pulse {
+  /* Force these classes to be included in the build */
 }
